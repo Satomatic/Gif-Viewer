@@ -35,7 +35,7 @@ def RunFrame():
 def Close():    
 	sys.exit(1)
 	
-def LoadGithub(event):
+def LoadGithub():
 	webbrowser.open_new(r"https://www.github.com/Satomatic")
 	
 window = Tk()
@@ -45,29 +45,34 @@ window.geometry("500x500")
 window.protocol('WM_DELETE_WINDOW', Close)
 window.resizable(0,0)
 window.iconbitmap("icon.ico")
-		
-try:
-	filepath = filedialog.askopenfilename(filetypes = (("gif animation","*.gif"),("all files","*.*")))
-except:
-	Close()
 
-# Clear temp #
-for item in os.listdir("Temp"):
-	os.remove("Temp/" + item)
+def Open():
+	try:
+		filepath = filedialog.askopenfilename(filetypes = (("gif animation","*.gif"),("all files","*.*")))
+	except:
+		Close()
+	# Clear temp #
+	for item in os.listdir("Temp"):
+		os.remove("Temp/" + item)
+	extractFrames(filepath, 'Temp')
+	filename = os.path.basename(filepath)
+	window.title("Gif Viewer :: " + filename)
+	img = pygame.image.load(filepath)
+	width = img.get_width()
+	height = img.get_height()
+	window.geometry(str(width) + "x" + str(height))
+	
+	RunThread = threading.Thread(target=RunFrame)
+	RunThread.daemon = True
+	RunThread.start()
 
-extractFrames(filepath, 'Temp')
-filename = os.path.basename(filepath)
-window.title("Gif Viewer :: " + filename)
-img = pygame.image.load(filepath)
-width = img.get_width()
-height = img.get_height()
-window.geometry(str(width) + "x" + str(height))
+menubar = Menu(window)
+menubar.add_command(label="open", command=Open)
+menubar.add_command(label="github", command=LoadGithub)
+menubar.add_command(label="exit", command=Close)
+window.config(menu=menubar)
 
 PhotoFrame = Label(window)
 PhotoFrame.pack(fill=BOTH)
-
-RunThread = threading.Thread(target=RunFrame)
-RunThread.daemon = True
-RunThread.start()
 
 window.mainloop()

@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 from PIL import Image
 import threading
 import webbrowser
@@ -10,6 +11,13 @@ import os
 
 # This was written by Satomatic (Brian Thomson)
 # github.com/Satomatic
+
+# Clear temp on startup
+for item in os.listdir("Temp"):
+	if ".ignore" in item:
+		continue
+	else:
+		os.remove("Temp/" + item)
 
 def extractFrames(inGif, outFolder):
 	frame = Image.open(inGif)
@@ -26,13 +34,22 @@ def extractFrames(inGif, outFolder):
 def RunFrame():
 	while True:
 		for item in os.listdir("Temp"):
-			imagename = "Temp/" + item
-			
-			ImageObject = PhotoImage(file=imagename)
-			PhotoFrame.config(image=ImageObject)
-			time.sleep(0.1)
+			if ".gif" in item:
+				imagename = "Temp/" + item
 
-def Close():    
+				ImageObject = PhotoImage(file=imagename)
+				PhotoFrame.config(image=ImageObject)
+				time.sleep(0.1)
+			else:
+				continue
+
+def Close():
+	for item in os.listdir("Temp"):
+		if ".ignore" in item:
+			continue
+		else:
+			os.remove("Temp/" + item)
+			
 	sys.exit(1)
 	
 def LoadGithub():
@@ -46,33 +63,51 @@ window.protocol('WM_DELETE_WINDOW', Close)
 window.resizable(0,0)
 window.iconbitmap("icon.ico")
 
-def Open():
+def Open(event):
 	try:
 		filepath = filedialog.askopenfilename(filetypes = (("gif animation","*.gif"),("all files","*.*")))
+
+		if filepath == "":
+			pass
+		else:
+			filename = os.path.basename(filepath)
+
+			if filename.endswith(".gif"):
+				print("File type gif")
+
+				# Clear temp if failed on startup
+				for item in os.listdir("Temp"):
+					if ".ignore" in item:
+						continue
+					else:
+						os.remove("Temp/" + item)
+					
+				extractFrames(filepath, 'Temp')
+				window.title("Gif Viewer :: " + filename)
+				img = pygame.image.load(filepath)
+				width = img.get_width()
+				height = img.get_height()
+				window.geometry(str(width) + "x" + str(height))
+				
+				RunThread = threading.Thread(target=RunFrame)
+				RunThread.daemon = True
+				RunThread.start()
+			else:
+				print("Bad file type")
+				messagebox.showerror("Error", "Unsupported file type,\nPlease use '.gif'")
 	except:
-		Close()
-	# Clear temp #
-	for item in os.listdir("Temp"):
-		os.remove("Temp/" + item)
-	extractFrames(filepath, 'Temp')
-	filename = os.path.basename(filepath)
-	window.title("Gif Viewer :: " + filename)
-	img = pygame.image.load(filepath)
-	width = img.get_width()
-	height = img.get_height()
-	window.geometry(str(width) + "x" + str(height))
-	
-	RunThread = threading.Thread(target=RunFrame)
-	RunThread.daemon = True
-	RunThread.start()
+		messagebox.showerror("Error", "An unknown error has occurred :/")
 
 menubar = Menu(window)
-menubar.add_command(label="open", command=Open)
+menubar.add_command(label="open", command= lambda: Open("penis lol"))
 menubar.add_command(label="github", command=LoadGithub)
 menubar.add_command(label="exit", command=Close)
 window.config(menu=menubar)
 
 PhotoFrame = Label(window)
 PhotoFrame.pack(fill=BOTH)
+
+# Key Binds
+window.bind("<Control-o>", Open)
 
 window.mainloop()

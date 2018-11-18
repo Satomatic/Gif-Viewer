@@ -11,8 +11,8 @@ import os
 
 # This was written by Satomatic (Brian Thomson)
 # github.com/Satomatic
-
 # Clear temp on startup
+
 for item in os.listdir("Temp"):
 	if ".ignore" in item:
 		continue
@@ -23,10 +23,10 @@ def extractFrames(inGif, outFolder):
 	frame = Image.open(inGif)
 	nframes = 0
 	while frame:
-		frame.save( '%s/%s-%s.gif' % (outFolder, os.path.basename(inGif), nframes ) , 'PNG')
+		frame.save('%s/%s-%s.gif' % (outFolder, os.path.basename(inGif), nframes ), 'PNG')
 		nframes += 1
 		try:
-			frame.seek( nframes )
+			frame.seek(nframes)
 		except EOFError:
 			break;
 	return True

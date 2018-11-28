@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 from PIL import Image
+import linecache
 import threading
 import webbrowser
 import pygame
@@ -19,6 +20,26 @@ for item in os.listdir("Temp"):
 	else:
 		os.remove("Temp/" + item)
 
+def Close(event):
+	if messagebox.askyesno("Sure", "Are you sure you would\nlike to quit?"):
+		for item in os.listdir("Temp"):
+			if ".ignore" in item:
+				continue
+			else:
+				os.remove("Temp/" + item)
+				
+		sys.exit(1)
+	else:
+		passs
+		
+window = Tk()
+
+window.title("Gif Viewer")
+window.geometry("500x500")
+window.protocol('WM_DELETE_WINDOW', Close)
+window.resizable(0,0)
+window.iconbitmap("icon.ico")
+		
 def extractFrames(inGif, outFolder):
 	frame = Image.open(inGif)
 	nframes = 0
@@ -42,31 +63,14 @@ def RunFrame():
 				time.sleep(0.1)
 			else:
 				continue
-
-def Close():
-	for item in os.listdir("Temp"):
-		if ".ignore" in item:
-			continue
-		else:
-			os.remove("Temp/" + item)
-			
-	sys.exit(1)
 	
 def LoadGithub():
 	webbrowser.open_new(r"https://www.github.com/Satomatic")
-	
-window = Tk()
-
-window.title("Gif Viewer")
-window.geometry("500x500")
-window.protocol('WM_DELETE_WINDOW', Close)
-window.resizable(0,0)
-window.iconbitmap("icon.ico")
 
 def Open(event):
 	try:
 		filepath = filedialog.askopenfilename(filetypes = (("gif animation","*.gif"),("all files","*.*")))
-
+		
 		if filepath == "":
 			pass
 		else:
@@ -97,17 +101,27 @@ def Open(event):
 				messagebox.showerror("Error", "Unsupported file type,\nPlease use '.gif'")
 	except:
 		messagebox.showerror("Error", "An unknown error has occurred :/")
-
+		
+# Menu Bar
 menubar = Menu(window)
-menubar.add_command(label="open", command= lambda: Open("penis lol"))
-menubar.add_command(label="github", command=LoadGithub)
-menubar.add_command(label="exit", command=Close)
 window.config(menu=menubar)
+
+# File Menu
+filemenu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="File", menu=filemenu)
+filemenu.add_command(label="Open", command= lambda: Open("penis lol"))
+filemenu.add_command(label="Exit", command= lambda: Close("dak jimbles"))
+
+# Other stuff
+menubar.add_command(label="github", command=LoadGithub)
+menubar.add_command(label="exit", command= lambda: Close(">:O"))
 
 PhotoFrame = Label(window)
 PhotoFrame.pack(fill=BOTH)
 
 # Key Binds
 window.bind("<Control-o>", Open)
+window.bind("<Control-O>", Open)
+window.bind("<Escape>", Close)
 
 window.mainloop()
